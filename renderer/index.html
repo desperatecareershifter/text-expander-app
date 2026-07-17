@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self';" />
+<title>SnapExpand</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">S</div>
+        <div class="brand-name">SnapExpand</div>
+      </div>
+
+      <nav class="nav">
+        <button class="nav-item active" data-view="shortcuts">
+          <span class="nav-icon">&#9776;</span> Shortcuts
+        </button>
+        <button class="nav-item" data-view="settings">
+          <span class="nav-icon">&#9881;</span> Settings
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <label class="switch-row">
+          <span>Expansion</span>
+          <span class="switch">
+            <input type="checkbox" id="masterEnableToggle" />
+            <span class="slider"></span>
+          </span>
+        </label>
+        <div class="status-line" id="statusLine">Checking status&hellip;</div>
+      </div>
+    </aside>
+
+    <main class="content">
+      <!-- SHORTCUTS VIEW -->
+      <section class="view" id="view-shortcuts">
+        <header class="view-header">
+          <div>
+            <h1>Shortcuts</h1>
+            <p class="subtitle">Type a trigger anywhere, get the full text instantly.</p>
+          </div>
+          <button class="btn primary" id="openAddModal">+ Add shortcut</button>
+        </header>
+
+        <div class="toolbar">
+          <input type="search" id="searchInput" placeholder="Search triggers or expansions&hellip;" class="search-input" />
+          <label class="sort-control">
+            Sort by
+            <select id="sortSelect">
+              <option value="dateAdded-desc">Date added (newest)</option>
+              <option value="dateAdded-asc">Date added (oldest)</option>
+              <option value="dateModified-desc">Last modified</option>
+              <option value="name-asc">Trigger (A–Z)</option>
+              <option value="name-desc">Trigger (Z–A)</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="list" id="shortcutList"></div>
+
+        <div class="empty-state" id="emptyState" hidden>
+          <div class="empty-emoji">✂️</div>
+          <h3>No shortcuts yet</h3>
+          <p>Add your first one — try a trigger like <code>:sig</code> or <code>;addr</code>.</p>
+          <button class="btn primary" id="emptyAddBtn">+ Add shortcut</button>
+        </div>
+      </section>
+
+      <!-- SETTINGS VIEW -->
+      <section class="view" id="view-settings" hidden>
+        <header class="view-header">
+          <div>
+            <h1>Settings</h1>
+            <p class="subtitle">Control where and how expansion happens.</p>
+          </div>
+        </header>
+
+        <div class="card">
+          <h3>Expansion scope</h3>
+          <p class="muted">Choose whether shortcuts expand everywhere on your PC, or only inside specific browsers.</p>
+
+          <label class="radio-row">
+            <input type="radio" name="mode" value="global" id="modeGlobal" />
+            <div>
+              <div class="radio-title">Global — every app</div>
+              <div class="radio-desc">Shortcuts expand in any Windows application: browsers, editors, chat apps, everything.</div>
+            </div>
+          </label>
+
+          <label class="radio-row">
+            <input type="radio" name="mode" value="browsers" id="modeBrowsers" />
+            <div>
+              <div class="radio-title">Only in selected browsers</div>
+              <div class="radio-desc">Shortcuts only expand while typing inside the browser windows checked below.</div>
+            </div>
+          </label>
+
+          <div class="browser-checks" id="browserChecks">
+            <label class="check-row">
+              <input type="checkbox" id="browserChrome" />
+              Google Chrome
+            </label>
+            <label class="check-row">
+              <input type="checkbox" id="browserEdge" />
+              Microsoft Edge
+            </label>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Startup</h3>
+          <label class="switch-row spread">
+            <span>
+              <div class="radio-title">Launch SnapExpand when Windows starts</div>
+              <div class="radio-desc">Keeps your shortcuts working automatically after signing in.</div>
+            </span>
+            <span class="switch">
+              <input type="checkbox" id="launchAtLoginToggle" />
+              <span class="slider"></span>
+            </span>
+          </label>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ADD / EDIT MODAL -->
+  <div class="modal-overlay" id="modalOverlay" hidden>
+    <div class="modal">
+      <h2 id="modalTitle">Add shortcut</h2>
+      <form id="shortcutForm">
+        <label class="field">
+          <span>Trigger</span>
+          <input type="text" id="triggerInput" placeholder="e.g. :sig or ;addr" required maxlength="40" />
+          <span class="hint">What you'll type to trigger the expansion. Keep it short and distinctive.</span>
+        </label>
+        <label class="field">
+          <span>Expansion text</span>
+          <textarea id="expansionInput" rows="6" placeholder="The full text that will be typed out&hellip;" required></textarea>
+        </label>
+        <p class="form-error" id="formError" hidden></p>
+        <div class="modal-actions">
+          <button type="button" class="btn ghost" id="cancelModal">Cancel</button>
+          <button type="submit" class="btn primary" id="saveModal">Save shortcut</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" hidden></div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>

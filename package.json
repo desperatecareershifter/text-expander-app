@@ -1,0 +1,52 @@
+{
+  "name": "snap-expand",
+  "productName": "SnapExpand",
+  "version": "1.0.0",
+  "description": "A lightweight text expander for Windows. Type a short trigger, get the full text instantly.",
+  "main": "main/main.js",
+  "author": "AJ",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "postinstall": "electron-builder install-app-deps",
+    "dist:win": "electron-builder --win --x64",
+    "pack": "electron-builder --dir"
+  },
+  "dependencies": {
+    "electron-store": "^8.2.0",
+    "uiohook-napi": "^1.5.4"
+  },
+  "devDependencies": {
+    "electron": "^30.0.9",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.aj.snapexpand",
+    "productName": "SnapExpand",
+    "asar": true,
+    "files": [
+      "main/**/*",
+      "renderer/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "win": {
+      "target": [
+        { "target": "nsis", "arch": ["x64"] }
+      ],
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "SnapExpand"
+    }
+  }
+}
