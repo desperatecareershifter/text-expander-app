@@ -32,6 +32,7 @@
           </span>
         </label>
         <div class="status-line" id="statusLine">Checking status&hellip;</div>
+        <div class="status-line error" id="engineErrorLine" hidden></div>
       </div>
     </aside>
 
@@ -123,6 +124,12 @@
               <span class="slider"></span>
             </span>
           </label>
+        </div>
+
+        <div class="card">
+          <h3>Diagnostics</h3>
+          <p class="muted">If expansion doesn't seem to be working, this opens a log file with details that can help figure out why.</p>
+          <button class="btn ghost" id="openLogFolderBtn">Open log file location</button>
         </div>
       </section>
     </main>

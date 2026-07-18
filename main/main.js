@@ -2,6 +2,14 @@ const { app, BrowserWindow, Tray, Menu, ipcMain, nativeImage, shell } = require(
 const path = require('path');
 const store = require('./store');
 const { ExpansionEngine } = require('./expander');
+const logger = require('./logger');
+
+process.on('uncaughtException', (err) => {
+  logger.logError('uncaughtException', err);
+});
+process.on('unhandledRejection', (err) => {
+  logger.logError('unhandledRejection', err);
+});
 
 const ICON_PATH = path.join(__dirname, '..', 'build', 'icon.ico');
 
@@ -86,17 +94,24 @@ function notifyShortcutsChanged() {
 }
 
 function setupEngine() {
-  engine = new ExpansionEngine({
-    getShortcuts: store.getShortcuts,
-    getSettings: store.getSettings,
-    onExpansion: (shortcut) => {
-      if (mainWindow) mainWindow.webContents.send('expansion-fired', shortcut);
-    },
-    onError: (err) => {
-      console.error('Expansion error:', err);
-    }
-  });
-  engine.start();
+  try {
+    engine = new ExpansionEngine({
+      getShortcuts: store.getShortcuts,
+      getSettings: store.getSettings,
+      onExpansion: (shortcut) => {
+        if (mainWindow) mainWindow.webContents.send('expansion-fired', shortcut);
+      },
+      onError: (err) => {
+        logger.logError('expansion-engine', err);
+        if (mainWindow) mainWindow.webContents.send('engine-error', err.message || String(err));
+      }
+    });
+    engine.start();
+    logger.log('Expansion engine started.');
+  } catch (err) {
+    logger.logError('setupEngine', err);
+    if (mainWindow) mainWindow.webContents.send('engine-error', err.message || String(err));
+  }
 }
 
 // ---- IPC handlers -----------------------------------------------------
@@ -126,6 +141,10 @@ ipcMain.handle('settings:update', (e, partial) => {
 });
 
 ipcMain.handle('app:platform', () => process.platform);
+ipcMain.handle('app:openLogFolder', () => {
+  shell.showItemInFolder(logger.getLogPath());
+  return true;
+});
 
 // ---- Lifecycle ----------------------------------------------------------
 
@@ -142,6 +161,7 @@ if (!gotLock) {
   });
 
   app.whenReady().then(() => {
+    logger.log(`SnapExpand starting. platform=${process.platform} electron=${process.versions.electron}`);
     createWindow();
     createTray();
     setupEngine();

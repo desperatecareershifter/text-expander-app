@@ -28,6 +28,8 @@
 
   const masterEnableToggle = document.getElementById('masterEnableToggle');
   const statusLine = document.getElementById('statusLine');
+  const engineErrorLine = document.getElementById('engineErrorLine');
+  const openLogFolderBtn = document.getElementById('openLogFolderBtn');
 
   const modeGlobal = document.getElementById('modeGlobal');
   const modeBrowsers = document.getElementById('modeBrowsers');
@@ -254,6 +256,12 @@
   api.onShortcutsChanged((data) => { shortcuts = data; renderList(); });
   api.onSettingsChanged((data) => { settings = data; renderSettings(); });
   api.onExpansionFired((shortcut) => showToast(`Expanded "${shortcut.trigger}"`));
+  api.onEngineError((message) => {
+    engineErrorLine.hidden = false;
+    engineErrorLine.textContent = `Expansion isn't running: ${message}`;
+  });
+
+  openLogFolderBtn.addEventListener('click', () => api.openLogFolder());
 
   // ---------- Init ----------
   (async function init() {

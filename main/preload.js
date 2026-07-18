@@ -10,6 +10,7 @@ contextBridge.exposeInMainWorld('snapExpand', {
   updateSettings: (partial) => ipcRenderer.invoke('settings:update', partial),
 
   getPlatform: () => ipcRenderer.invoke('app:platform'),
+  openLogFolder: () => ipcRenderer.invoke('app:openLogFolder'),
 
   onShortcutsChanged: (cb) => {
     const listener = (_e, data) => cb(data);
@@ -25,5 +26,10 @@ contextBridge.exposeInMainWorld('snapExpand', {
     const listener = (_e, data) => cb(data);
     ipcRenderer.on('expansion-fired', listener);
     return () => ipcRenderer.removeListener('expansion-fired', listener);
+  },
+  onEngineError: (cb) => {
+    const listener = (_e, data) => cb(data);
+    ipcRenderer.on('engine-error', listener);
+    return () => ipcRenderer.removeListener('engine-error', listener);
   }
 });

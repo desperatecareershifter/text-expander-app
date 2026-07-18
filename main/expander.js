@@ -1,6 +1,17 @@
-const { uIOhook } = require('uiohook-napi');
 const { charForEvent, RESET_KEYS, BACKSPACE_KEY } = require('./keymap');
 const { getForegroundProcessName, injectExpansion } = require('./winAutomation');
+
+// Load the native keyboard-hook module defensively - on a broken install
+// (e.g. it got trapped inside an asar archive, or the platform binary is
+// missing) this throws, and we want the app to keep running and clearly
+// report the problem instead of silently doing nothing.
+let uIOhook = null;
+let uiohookLoadError = null;
+try {
+  ({ uIOhook } = require('uiohook-napi'));
+} catch (err) {
+  uiohookLoadError = err;
+}
 
 const MAX_BUFFER = 60;
 const CONFIRM_DELAY_MS = 350; // wait this long before firing a trigger that is a prefix of a longer one
@@ -28,13 +39,27 @@ class ExpansionEngine {
 
   start() {
     if (this.running) return;
-    uIOhook.on('keydown', this._onKeydown);
-    uIOhook.start();
-    this.running = true;
+    if (!uIOhook) {
+      this.onError(
+        new Error(
+          `Keyboard hook module failed to load, expansion cannot run: ${
+            uiohookLoadError ? uiohookLoadError.message : 'unknown reason'
+          }`
+        )
+      );
+      return;
+    }
+    try {
+      uIOhook.on('keydown', this._onKeydown);
+      uIOhook.start();
+      this.running = true;
+    } catch (err) {
+      this.onError(new Error(`Keyboard hook failed to start: ${err.message}`));
+    }
   }
 
   stop() {
-    if (!this.running) return;
+    if (!this.running || !uIOhook) return;
     uIOhook.off('keydown', this._onKeydown);
     uIOhook.stop();
     this.running = false;
